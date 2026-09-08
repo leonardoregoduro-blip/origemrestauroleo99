@@ -1,0 +1,10 @@
+{
+  "description": "Restores and revitalizes old, damaged photos to their original quality while providing easy access to social media and WhatsApp for customer support.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
