@@ -1,4 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import img1Before from "./imports/photo_4949531736983407752_y.jpg";
+import img1After from "./imports/photo_4949531736983407753_y.jpg";
+import img2Before from "./imports/photo_4949531736983407750_y-1.jpg";
+import img2After from "./imports/photo_4949531736983407750_y__1_.jpg";
+import img3Before from "./imports/photo_4949531736983407761_x.jpg";
+import img3After from "./imports/photo_4949531736983407761_x__1_.jpg";
 
 const WHATSAPP = "5562993040004";
 const INSTAGRAM = "https://www.instagram.com/origemrestauro";
@@ -336,18 +342,18 @@ function BeforeAfterCard({
 function Gallery() {
   const pairs = [
     {
-      before: "/src/imports/photo_4949531736983407752_y.jpg",
-      after: "/src/imports/photo_4949531736983407753_y.jpg",
+      before: img1Before,
+      after: img1After,
       label: "Foto em combate 2014",
     },
     {
-      before: "/src/imports/photo_4949531736983407750_y-1.jpg",
-      after: "/src/imports/photo_4949531736983407750_y__1_.jpg",
+      before: img2Before,
+      after: img2After,
       label: "Foto em família 2011",
     },
     {
-      before: "/src/imports/photo_4949531736983407761_x.jpg",
-      after: "/src/imports/photo_4949531736983407761_x__1_.jpg",
+      before: img3Before,
+      after: img3After,
       label: "Foto em família de aniversário 2008",
     },
   ];
