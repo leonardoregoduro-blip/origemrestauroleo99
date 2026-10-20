@@ -9,6 +9,9 @@ import img3After from "./imports/photo_4949531736983407761_x__1_.jpg";
 const WHATSAPP = "5562993040004";
 const INSTAGRAM = "https://www.instagram.com/origemrestauro";
 const FACEBOOK = "https://www.facebook.com/OrigemRestauro";
+const WHATSAPP_MESSAGE = "Olá! Gostaria de um orçamento para restauração de fotos.";
+const whatsappLink = (message = WHATSAPP_MESSAGE) =>
+  `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`;
 
 function NavBar() {
   const [scrolled, setScrolled] = useState(false);
@@ -57,7 +60,7 @@ function NavBar() {
             </a>
           ))}
           <a
-            href={`https://wa.me/${WHATSAPP}`}
+            href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
             className="px-5 py-2 text-sm font-semibold rounded-full transition-all hover:scale-105"
@@ -71,7 +74,9 @@ function NavBar() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2"
           style={{ color: "#3d2b1f" }}
-          aria-label="Menu"
+          aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {menuOpen ? (
@@ -84,7 +89,11 @@ function NavBar() {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden px-6 pb-6 flex flex-col gap-4" style={{ background: "#faf7f2" }}>
+        <div
+          id="mobile-menu"
+          className="md:hidden px-6 pb-6 flex flex-col gap-4"
+          style={{ background: "#faf7f2" }}
+        >
           {links.map((l) => (
             <a
               key={l.href}
@@ -97,7 +106,7 @@ function NavBar() {
             </a>
           ))}
           <a
-            href={`https://wa.me/${WHATSAPP}`}
+            href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 px-5 py-3 text-center text-sm font-semibold rounded-full"
@@ -127,9 +136,10 @@ function Hero() {
 
       <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-30 hidden lg:block">
         <img
-          src="https://images.unsplash.com/photo-1699699834386-c123f63dc03e?w=900&h=1200&fit=crop&auto=format"
-          alt="Fotografia antiga restaurada"
+          src="https://images.unsplash.com/photo-1723140934387-aef910e0ea61?w=900&h=1200&fit=crop&auto=format"
+          alt="Fotografia antiga de uma família preservada sobre uma mesa"
           className="w-full h-full object-cover"
+          fetchPriority="high"
         />
         <div
           className="absolute inset-0"
@@ -164,7 +174,7 @@ function Hero() {
 
           <div className="flex flex-wrap gap-4">
             <a
-              href={`https://wa.me/${WHATSAPP}?text=Olá! Gostaria de um orçamento para restauração de fotos.`}
+              href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-7 py-4 font-semibold rounded-full transition-all hover:scale-105 hover:shadow-lg"
@@ -195,32 +205,32 @@ function Hero() {
 function Services() {
   const services = [
     {
-      icon: "🖼️",
+      icon: "restore",
       title: "Restauração de Danos",
       desc: "Reparamos rasgos, manchas, riscos, dobras e danos causados pelo tempo em fotografias impressas.",
     },
     {
-      icon: "🎨",
+      icon: "color",
       title: "Colorização",
       desc: "Transformamos fotos em preto e branco em imagens coloridas com naturalidade e fidelidade histórica.",
     },
     {
-      icon: "✨",
+      icon: "enhance",
       title: "Melhora de Qualidade",
       desc: "Aumentamos a nitidez, recuperamos detalhes perdidos e melhoramos a exposição de fotos antigas.",
     },
     {
-      icon: "🖨️",
+      icon: "print",
       title: "Impressão Premium",
       desc: "Imprimimos as fotos restauradas em papel fotográfico de alta qualidade para durar décadas.",
     },
     {
-      icon: "📱",
+      icon: "scan",
       title: "Digitalização",
       desc: "Digitalizamos em alta resolução para que suas memórias existam com segurança em formato digital.",
     },
     {
-      icon: "💌",
+      icon: "gift",
       title: "Presentes Personalizados",
       desc: "Criamos quadros, álbuns e produtos personalizados com as fotos restauradas para presentear.",
     },
@@ -249,7 +259,13 @@ function Services() {
               className="group p-8 rounded-2xl border transition-all duration-300 hover:shadow-md hover:-translate-y-1"
               style={{ background: "#faf7f2", borderColor: "#d9cfc0" }}
             >
-              <div className="text-4xl mb-4">{s.icon}</div>
+              <div
+                className="w-11 h-11 mb-5 rounded-full flex items-center justify-center"
+                style={{ background: "#f0e4d1", color: "#9b641f" }}
+                aria-hidden="true"
+              >
+                <ServiceIcon name={s.icon} />
+              </div>
               <h3
                 className="text-xl font-semibold mb-3"
                 style={{ fontFamily: "'Playfair Display', serif", color: "#3d2b1f" }}
@@ -286,25 +302,71 @@ function BeforeAfterCard({
     return Math.min(100, Math.max(0, ((clientX - left) / width) * 100));
   };
 
+  const setFromPointer = (clientX: number) => setPos(getPos(clientX));
+
+  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const steps: Record<string, number> = {
+      ArrowLeft: -2,
+      ArrowDown: -2,
+      ArrowRight: 2,
+      ArrowUp: 2,
+    };
+
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      setPos(event.key === "Home" ? 0 : 100);
+      return;
+    }
+
+    if (steps[event.key]) {
+      event.preventDefault();
+      setPos((current) => Math.min(100, Math.max(0, current + steps[event.key])));
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <div
         ref={ref}
-        className="relative overflow-hidden rounded-xl cursor-col-resize select-none"
-        style={{ aspectRatio: "4/3", background: "#d9cfc0" }}
-        onMouseDown={() => (dragging.current = true)}
-        onMouseMove={(e) => dragging.current && setPos(getPos(e.clientX))}
-        onMouseUp={() => (dragging.current = false)}
-        onMouseLeave={() => (dragging.current = false)}
-        onTouchMove={(e) => setPos(getPos(e.touches[0].clientX))}
+        className="relative overflow-hidden rounded-xl cursor-col-resize select-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#c9923a]"
+        style={{ aspectRatio: "4/3", background: "#d9cfc0", touchAction: "pan-y" }}
+        role="slider"
+        tabIndex={0}
+        aria-label={`Comparar antes e depois: ${label}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(pos)}
+        aria-valuetext={`${Math.round(pos)}% da imagem original visível`}
+        onKeyDown={onKeyDown}
+        onPointerDown={(event) => {
+          dragging.current = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          setFromPointer(event.clientX);
+        }}
+        onPointerMove={(event) => dragging.current && setFromPointer(event.clientX)}
+        onPointerUp={(event) => {
+          dragging.current = false;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+        onPointerCancel={() => (dragging.current = false)}
       >
-        <img src={after} alt="Depois" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+        <img
+          src={after}
+          alt={`${label}, depois da restauração`}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+        >
           <img
             src={before}
-            alt="Antes"
-            className="absolute inset-0 object-cover"
-            style={{ width: ref.current?.getBoundingClientRect().width ?? 400, height: "100%" }}
+            alt={`${label}, antes da restauração`}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           <div
             className="absolute inset-y-0 right-0 opacity-60"
@@ -335,6 +397,15 @@ function BeforeAfterCard({
       <p className="text-center text-sm font-medium" style={{ color: "#6b3e26" }}>
         {label}
       </p>
+      <a
+        href={whatsappLink(`Olá! Vi o resultado “${label}” no site e gostaria de restaurar uma foto.`)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-center text-xs font-semibold tracking-wide transition-colors hover:underline"
+        style={{ color: "#9b641f" }}
+      >
+        Quero um resultado como este
+      </a>
     </div>
   );
 }
@@ -344,7 +415,7 @@ function Gallery() {
     {
       before: img1Before,
       after: img1After,
-      label: "Foto em combate 2014",
+      label: "Retrato familiar — anos 1940",
     },
     {
       before: img2Before,
@@ -452,24 +523,24 @@ function Testimonials() {
   );
 }
 
-function Stats() {
+function Commitments() {
   return (
     <section className="py-16 px-6" style={{ background: "#c9923a" }}>
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
         {[
-          { num: "+2.000", label: "Fotos Restauradas" },
-          { num: "8 anos", label: "de Experiência" },
-          { num: "98%", label: "Clientes Satisfeitos" },
-          { num: "48h", label: "Prazo Médio" },
+          { title: "Análise", label: "personalizada para cada foto" },
+          { title: "Atendimento", label: "online para todo o Brasil" },
+          { title: "Entrega", label: "digital em alta resolução" },
+          { title: "Cuidado", label: "com cada detalhe da memória" },
         ].map((s) => (
           <div key={s.label}>
             <p
-              className="text-4xl font-bold mb-1"
+              className="text-2xl lg:text-3xl font-bold mb-2"
               style={{ fontFamily: "'Playfair Display', serif", color: "#1a0f0a" }}
             >
-              {s.num}
+              {s.title}
             </p>
-            <p className="text-sm font-medium" style={{ color: "#5a2e0a" }}>
+            <p className="text-sm font-medium max-w-40 mx-auto" style={{ color: "#5a2e0a" }}>
               {s.label}
             </p>
           </div>
@@ -497,12 +568,12 @@ function Contact() {
           </h2>
           <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "#6b3e26" }}>
             Envie uma mensagem pelo WhatsApp ou nas redes sociais. Nossa equipe irá analisar sua foto e enviar um
-            orçamento sem compromisso em até 2 horas.
+            orçamento sem compromisso com prazo e valor definidos para o seu caso.
           </p>
 
           <div className="flex flex-col gap-4">
             <a
-              href={`https://wa.me/${WHATSAPP}?text=Olá! Gostaria de um orçamento para restauração de fotos.`}
+              href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all hover:scale-105 hover:shadow-lg"
@@ -511,7 +582,7 @@ function Contact() {
               <WhatsAppIcon size={24} />
               <span>
                 <span className="block text-xs font-normal opacity-80">Fale conosco agora</span>
-                WhatsApp
+                WhatsApp · (62) 99304-0004
               </span>
             </a>
 
@@ -557,6 +628,7 @@ function Contact() {
             src="https://images.unsplash.com/photo-1565893089337-4680bbb1f34e?w=700&h=500&fit=crop&auto=format"
             alt="Fotos antigas em mesa de madeira"
             className="w-full h-64 object-cover"
+            loading="lazy"
           />
           <div className="p-8" style={{ background: "#faf7f2" }}>
             <h3
@@ -569,7 +641,7 @@ function Contact() {
               {[
                 "Envie a foto pelo WhatsApp ou redes sociais",
                 "Receba um orçamento personalizado sem compromisso",
-                "Aprovando, iniciamos a restauração em até 24h",
+                "Após a aprovação, combinamos o prazo de entrega",
                 "Entregamos o arquivo digital em alta resolução",
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-3">
@@ -586,6 +658,71 @@ function Contact() {
               ))}
             </ol>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQ() {
+  const items = [
+    {
+      question: "Preciso enviar a fotografia original?",
+      answer:
+        "Não. Você pode enviar uma foto bem iluminada ou uma digitalização pelo WhatsApp. Orientamos como captar a melhor imagem possível antes do orçamento.",
+    },
+    {
+      question: "Quanto custa uma restauração?",
+      answer:
+        "O valor depende do nível de dano, da quantidade de pessoas e do acabamento desejado. A análise inicial é gratuita e sem compromisso.",
+    },
+    {
+      question: "Quanto tempo leva?",
+      answer:
+        "O prazo é informado no orçamento, após avaliarmos a complexidade da imagem. Assim, você sabe exatamente quando receberá o resultado.",
+    },
+    {
+      question: "Minha fotografia será publicada?",
+      answer:
+        "Somente com sua autorização. Tratamos cada imagem como uma memória particular e respeitamos a privacidade da sua família.",
+    },
+  ];
+
+  return (
+    <section className="py-24 px-6" style={{ background: "#faf7f2" }}>
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: "#c9923a" }}>
+            Tire suas dúvidas
+          </span>
+          <h2
+            className="mt-3 text-4xl lg:text-5xl font-bold"
+            style={{ fontFamily: "'Playfair Display', serif", color: "#3d2b1f" }}
+          >
+            Perguntas frequentes
+          </h2>
+        </div>
+        <div className="divide-y" style={{ borderColor: "#d9cfc0" }}>
+          {items.map((item) => (
+            <details key={item.question} className="group py-5">
+              <summary
+                className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold"
+                style={{ color: "#3d2b1f" }}
+              >
+                {item.question}
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform group-open:rotate-45"
+                  style={{ background: "#f0e4d1", color: "#9b641f" }}
+                  aria-hidden="true"
+                >
+                  +
+                </span>
+              </summary>
+              <p className="pt-4 pr-12 leading-relaxed" style={{ color: "#6b3e26" }}>
+                {item.answer}
+              </p>
+            </details>
+          ))}
         </div>
       </div>
     </section>
@@ -610,7 +747,7 @@ function Footer() {
         </p>
         <div className="flex items-center gap-4">
           <a
-            href={`https://wa.me/${WHATSAPP}`}
+            href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp"
@@ -639,6 +776,38 @@ function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function FloatingWhatsApp() {
+  return (
+    <a
+      href={whatsappLink()}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Solicitar orçamento pelo WhatsApp"
+      className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 md:hidden"
+      style={{ background: "#25d366", color: "#fff" }}
+    >
+      <WhatsAppIcon size={26} />
+    </a>
+  );
+}
+
+function ServiceIcon({ name }: { name: string }) {
+  const paths: Record<string, React.ReactNode> = {
+    restore: <path d="M4 7h16v12H4zM8 7V4h8v3M8 12l2-2 3 3 2-2 3 3" />,
+    color: <path d="M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a2 2 0 0 1 0-4h2a7 7 0 0 0-2-11ZM7.5 11h.01M9 7.5h.01M13 6.5h.01M16.5 9h.01" />,
+    enhance: <path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3ZM18 15l.75 2.25L21 18l-2.25.75L18 21l-.75-2.25L15 18l2.25-.75L18 15Z" />,
+    print: <path d="M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01" />,
+    scan: <path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4M7 12h10" />,
+    gift: <path d="M3 10h18v4H3zM5 14h14v7H5zM12 10v11M12 10H8.5A2.5 2.5 0 1 1 11 7.5V10Zm0 0h3.5A2.5 2.5 0 1 0 13 7.5V10Z" />,
+  };
+
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
   );
 }
 
@@ -671,12 +840,14 @@ export default function App() {
     <div className="min-h-screen">
       <NavBar />
       <Hero />
-      <Stats />
+      <Commitments />
       <Services />
       <Gallery />
       <Testimonials />
+      <FAQ />
       <Contact />
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }
