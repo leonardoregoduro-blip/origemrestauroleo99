@@ -415,7 +415,7 @@ function Gallery() {
     {
       before: img1Before,
       after: img1After,
-      label: "Retrato familiar — anos 1940",
+      label: "Foto em combate 2023",
     },
     {
       before: img2Before,
